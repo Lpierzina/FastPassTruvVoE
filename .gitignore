@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 node_modules/
 .env
 npm-debug.log*
@@ -5,3 +6,18 @@ yarn-debug.log*
 yarn-error.log*
 .DS_Store
 Thumbs.db
+=======
+.idea
+.vscode
+.vs
+.mypy_cache
+.DS_Store
+__pycache__
+.env
+.venv
+node_modules
+
+[Bb]in/
+[Oo]bj/
+c-sharp/[Oo]ut/
+>>>>>>> 7639fb3e248054c371bff590a6cda4c2c94053cc

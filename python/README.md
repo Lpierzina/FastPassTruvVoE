@@ -1,0 +1,57 @@
+# Python Quickstart
+
+## Introduction
+
+Let's get you started with Truv by walking through this Python Quickstart app. You'll need a set of API keys which you can get by signing up at [https://dashboard.truv.com](https://dashboard.truv.com)
+
+You'll have two different API keys used by the back end, `Client ID` and `Access key`.
+
+Full documentation is available at [https://docs.truv.com/docs/quickstart-guide](https://docs.truv.com/docs/quickstart-guide)
+
+## Requirements
+
+Python 3.8+
+
+## Set up the Python Quickstart
+
+Once you have your API keys, it's time to run the Truv Python Quickstart app locally.
+
+1. `git clone https://github.com/truvhq/quickstart`
+2. `cd quickstart`
+3. `make env`
+4. Update the `.env` file in the root of the project. The contents of the `.env` has to look like this (values with <> should be replaced by the proper keys or values):
+
+    ```bash
+    API_CLIENT_ID=<YOUR CLIENT_ID HERE>
+    API_SECRET=<YOUR SECRET KEY MUST BE HERE>
+    API_PRODUCT_TYPE=<employment, income, admin, deposit_switch or fas>
+    IS_ORDER=<true or false - optional, defaults to false>
+    ```
+
+    **Note:** Set `IS_ORDER=true` to use the Orders API instead of the Users API for creating bridge tokens. This is useful for certain integration patterns where you want to pre-configure employer and account information.
+
+5. `make python_local`
+
+   After running this command, you should see:
+
+    ```output
+    * Serving Flask app "server" (lazy loading)
+    * Environment: development
+    * Debug mode: on
+    ======================================== ENVIRONMENT ========================================
+    {
+        "X-Access-Secret": "<YOUR SECRET_KEY HERE>",
+        "X-Access-Client-Id": "<YOUR CLIENT_ID HERE>",
+        "Content-Type": "application/json;charset=UTF-8"
+    }
+    ==============================================================================================
+
+    Quickstart Loaded. Navigate to http://localhost:5001 to view Quickstart.
+    ```
+
+    To access the app, open [http://127.0.0.1:5001/](http://127.0.0.1:5001/) in your browser.
+
+    Since Apple released MacOS Monterey, we changed the default Flask port to `5001`, to prevent conflict with AirPlay Receiver. More information
+    on this issue could be found [here](https://stackoverflow.com/questions/69818376/localhost5000-unavailable-in-macos-v12-monterey/).
+
+    But you can redefine this behavior by adding `FLASK_RUN_PORT=<custom port number>` to `.env` file.

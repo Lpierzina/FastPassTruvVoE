@@ -1,0 +1,43 @@
+version: "2.4"
+services:
+  python:
+    build:
+      context: .
+      dockerfile: ./python/Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "5001:5001"
+  ruby:
+    build:
+      context: .
+      dockerfile: ./ruby/Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "5002:5002"
+  golang:
+    build:
+      context: .
+      dockerfile: ./golang/Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "5003:5003"
+  node:
+    build:
+      context: .
+      dockerfile: ./node/Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "5004:5004"
+  csharp:
+    build:
+      context: .
+      dockerfile: ./c-sharp/Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "5005:80"
+
