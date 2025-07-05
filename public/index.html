@@ -374,7 +374,7 @@
             <p class="subtitle">To proceed, we need to verify your employment details through your payroll provider.</p>
         </div>
         <div class="button-container">
-            <button class="button-primary" onclick="bridge.open()">Connect Payroll</button>
+            <button class="button-primary" id="connectPayrollBtn">Connect Payroll</button>
         </div>
       </div>
 
@@ -547,8 +547,21 @@
             console.log("onClose callback called.")
           },
         })
-        window.bridge = bridge
-      })()
+       window.bridge = bridge;
+
+  // --- Add this right here! ---
+  const connectBtn = document.getElementById("connectPayrollBtn");
+  if (connectBtn) {
+    connectBtn.disabled = false;
+    connectBtn.onclick = function () {
+      if (window.bridge) {
+        window.bridge.open();
+      } else {
+        alert("Bridge not ready, please try again in a moment.");
+      }
+    };
+  }
+})();
 
       async function refresh() {
         const content = document.querySelector(".spinner-container")
