@@ -2,7 +2,8 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import htmlFile from './serve.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import crypto from 'crypto';
 
 import {
@@ -20,15 +21,15 @@ import {
 
 const { API_CLIENT_ID, API_SECRET, API_PRODUCT_TYPE, IS_ORDER } = process.env;
 
-const generate_webhook_sign = (body, key) => {
-  return 'v1=' + crypto.createHmac('sha256', key).update(body).digest('hex');
-};
-
 const app = express();
 let accessToken = null;
 let accessTokenResponse = null;
 
-// Helper function to validate access token
+// For ES Modules compatibility
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Helper: Validate access token is present
 const validateAccessToken = () => {
   if (!accessToken) {
     throw new Error('No access token available. Please complete verification first.');
@@ -36,23 +37,23 @@ const validateAccessToken = () => {
   return accessToken;
 };
 
-// ensure all request bodies are parsed to JSON
+// Helper: For webhook signing
+const generate_webhook_sign = (body, key) => {
+  return 'v1=' + crypto.createHmac('sha256', key).update(body).digest('hex');
+};
+
+// 1. Middleware (order matters!)
 app.use(
   bodyParser.json({
-    verify: (req, res, buf) => {
+    verify: (req, _res, buf) => {
       req.rawBody = buf;
     },
-  }),
+  })
 );
-
-// ensure CORS requests
 app.use(cors());
 
-// return HTML
-app.get('/', htmlFile);
-
-app.get('/getBridgeToken', async (req, res) => {
-  // retrieve bridge token
+// 2. API Routes (these come before static/catch-all!)
+app.get('/getBridgeToken', async (_req, res) => {
   try {
     if (IS_ORDER && IS_ORDER.toLowerCase() === 'true') {
       const order = await createOrder();
@@ -70,7 +71,6 @@ app.get('/getBridgeToken', async (req, res) => {
 });
 
 app.get('/getVerifications/:token', async (req, res) => {
-  // retrieve income verification information
   try {
     accessTokenResponse = await getAccessToken(req.params.token);
     if (!accessTokenResponse || !accessTokenResponse.access_token) {
@@ -88,12 +88,10 @@ app.get('/getVerifications/:token', async (req, res) => {
   }
 });
 
-app.get('/createRefreshTask', async (req, res) => {
-  // create a refresh task for a payroll connection that's already been made.
+app.get('/createRefreshTask', async (_req, res) => {
   try {
     validateAccessToken();
     const refreshTask = await createRefreshTask(accessToken);
-
     let taskStatus = await getRefreshTask(refreshTask.task_id);
 
     const finishedStatuses = [
@@ -119,14 +117,18 @@ app.get('/createRefreshTask', async (req, res) => {
       case 'income':
         res.json(await getLinkReport(accessTokenResponse.link_id, API_PRODUCT_TYPE));
         break;
-      case 'admin':
-        const accessToken = accessTokenResponse.access_token;
-        const directory = await getEmployeeDirectoryByToken(accessToken);
-        // A start and end date are needed for a payroll report. The dates hard coded below will return a proper report from the sandbox environment
-        const reportId = (await requestPayrollReport(accessToken, '2020-01-01', '2020-02-01')).payroll_report_id;
+      case 'admin': {
+        const _accessToken = accessTokenResponse.access_token;
+        const directory = await getEmployeeDirectoryByToken(_accessToken);
+        // Hardcoded dates for sandbox test
+        const reportId = (await requestPayrollReport(_accessToken, '2020-01-01', '2020-02-01')).payroll_report_id;
         const payroll = await getPayrollById(reportId);
         const data = { directory, payroll };
         res.json(data);
+        break;
+      }
+      default:
+        res.json({ success: false, error: 'Unknown API_PRODUCT_TYPE' });
         break;
     }
   } catch (e) {
@@ -137,14 +139,12 @@ app.get('/createRefreshTask', async (req, res) => {
 });
 
 app.get('/getAdminData/:token', async (req, res) => {
-  // retrieve income verification information
   try {
     const accessTokenResponse = await getAccessToken(req.params.token);
     accessToken = accessTokenResponse.access_token;
 
     const directory = await getEmployeeDirectoryByToken(accessToken);
 
-    // A start and end date are needed for a payroll report. The dates hard coded below will return a proper report from the sandbox environment
     const reportId = (await requestPayrollReport(accessToken, '2020-01-01', '2020-02-01')).payroll_report_id;
     const payroll = await getPayrollById(reportId);
 
@@ -158,7 +158,6 @@ app.get('/getAdminData/:token', async (req, res) => {
 });
 
 app.get('/getDepositSwitchData/:token', async (req, res) => {
-  // retrieve deposit switch status information
   try {
     const accessTokenResponse = await getAccessToken(req.params.token);
     const depositSwitchResult = await getLinkReport(accessTokenResponse.link_id, 'direct_deposit');
@@ -172,12 +171,11 @@ app.get('/getDepositSwitchData/:token', async (req, res) => {
 });
 
 app.get('/getPaycheckLinkedLoanData/:token', async (req, res) => {
-  // retrieve paycheck linked loan information
   try {
     const accessTokenResponse = await getAccessToken(req.params.token);
-    const payCheckLinkedLoadResult = await getLinkReport(accessTokenResponse.link_id, 'pll');
+    const payCheckLinkedLoanResult = await getLinkReport(accessTokenResponse.link_id, 'pll');
 
-    res.json(payCheckLinkedLoadResult);
+    res.json(payCheckLinkedLoanResult);
   } catch (e) {
     console.error('error with getPaycheckLinkedLoanData');
     console.error(e);
@@ -185,26 +183,36 @@ app.get('/getPaycheckLinkedLoanData/:token', async (req, res) => {
   }
 });
 
-app.post('/webhook', async (req, res) => {
+app.post('/webhook', (req, res) => {
   console.log('TRUV: Webhook Received');
   const body = req.rawBody.toString();
-
   const webhook_sign = generate_webhook_sign(body, API_SECRET);
   console.log(`TRUV: Event type:      ${req.body.event_type}`);
   console.log(`TRUV: Status:          ${req.body.status}`);
   console.log(`TRUV: Signature match: ${webhook_sign === req.headers['x-webhook-sign']}\n`);
-
   res.status(200).end();
 });
 
+// Helper for async sleep (used in refresh polling)
 function sleep(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 }
 
-// Global error handler middleware
-app.use((err, req, res) => {
+// 3. Static file serving (for /public)
+// This comes after API routes so /api doesn't get overridden!
+app.use(express.static(path.join(__dirname, '../public')));
+
+// 4. SPA catch-all (for react-router or client-side routing)
+// Must be after all API/static routes.
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+// 5. Global error handler
+// (Express expects 4 params: err, req, res, next)
+app.use((err, _req, res, _next) => {
   console.error('Global error handler:', err.message);
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({
@@ -213,9 +221,9 @@ app.use((err, req, res) => {
   });
 });
 
+// 6. Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  // output environment information
   console.log('='.repeat(40), 'ENVIRONMENT', '='.repeat(40));
   const environment = {
     API_CLIENT_ID,
@@ -227,4 +235,3 @@ app.listen(PORT, () => {
   console.log('='.repeat(94));
   console.log(`Quickstart Loaded. Navigate to http://localhost:${PORT} to view Quickstart.`);
 });
-
