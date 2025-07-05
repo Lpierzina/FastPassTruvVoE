@@ -204,7 +204,7 @@ function sleep(ms) {
 }
 
 // Global error handler middleware
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   console.error('Global error handler:', err.message);
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({
@@ -213,7 +213,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(5004, () => {
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
   // output environment information
   console.log('='.repeat(40), 'ENVIRONMENT', '='.repeat(40));
   const environment = {
@@ -224,5 +225,6 @@ app.listen(5004, () => {
   };
   console.log(environment);
   console.log('='.repeat(94));
-  console.log('Quickstart Loaded. Navigate to http://localhost:5004 to view Quickstart.');
+  console.log(`Quickstart Loaded. Navigate to http://localhost:${PORT} to view Quickstart.`);
 });
+
