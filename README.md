@@ -1,95 +1,78 @@
-<<<<<<< HEAD
-# NodeJS Quickstart
+FastPass Truv – Employment Verification
+Live Demo with PayPal Paywall
 
-## Introduction
+This is a ready-to-deploy demo of employment verification using Truv APIs.
+A working paywall powered by PayPal is included—users must pay to unlock verified employment data!
 
-Let's get you started with Truv by walking through this NodeJS Quickstart app. You'll need a set of API keys which you can get by signing up at [https://dashboard.truv.com](https://dashboard.truv.com)
+🚀 Live Heroku Demo
+Try it now:
+https://fastpasstruv-db0709d97556.herokuapp.com/
 
-You'll have two different API keys used by the back end, `Client ID` and `Access key`.
+Get Started (Local Setup)
+Clone the repository
 
-Full documentation is available at [https://docs.truv.com/docs/quickstart-guide](https://docs.truv.com/docs/quickstart-guide)
+sh
+Copy
+Edit
+git clone https://github.com/Lpierzina/FastPassTruvVoE.git
+Open the Node.js quickstart directory and create a .env file:
+cd
 
-## Requirements
+sh
+Copy
+Edit
+cd quickstart/node
+cp .env.example .env
+# or manually create .env with your credentials
+Add your Truv Client ID and Sandbox Access Key:
 
-The latest LTS version of `nodejs`
+ini
+Copy
+Edit
+# required
+API_CLIENT_ID=<your-client-id>
+API_SECRET=<your-sandbox-secret>
+API_PRODUCT_TYPE=employment
 
-## Set up the NodeJS Quickstart
-
-Once you have your API keys, it's time to run the Truv NodeJS Quickstart app locally.
-
-1. `git clone https://github.com/truvhq/quickstart`
-2. `cd quickstart`
-3. `make env`
-4. Update the `.env` file in the root of the project. The contents of the `.env` has to look like this (values with <> should be replaced by the proper keys or values):
-
-    ```bash
-    API_CLIENT_ID=<YOUR CLIENT_ID HERE>
-    API_SECRET=<YOUR SECRET KEY MUST BE HERE>
-    API_PRODUCT_TYPE=<employment, income, admin, deposit_switch or pll>
-    IS_ORDER=<true or false - optional, defaults to false>
-    ```
-
-    **Note:** Set `IS_ORDER=true` to use the Orders API instead of the Users API for creating bridge tokens. This is useful for certain integration patterns where you want to pre-configure employer and account information.
-
-5. `make node_local`
-
-    After running this command, you should see:
-
-    ```output
-    ======================================== ENVIRONMENT ========================================
-    {
-      API_CLIENT_ID: <YOUR CLIENT ID HERE>,
-      API_SECRET: <YOUR SECRET KEY HERE>,
-      API_PRODUCT_TYPE: <YOUR PRODUCT TYPE HERE>
-    }
-    ==============================================================================================
-    listening on port 5004
-    ```
-
-    To access the app, open [http://127.0.0.1:5004/](http://127.0.0.1:5004/) in your browser.
-=======
-# Get started with Quickstart for web
-To get started with Truv, we recommend following a step-by-step walkthrough in our docs https://docs.truv.com/docs/quickstart-guide
-
-1. Clone the repository
-```shell
-git clone https://github.com/truvhq/quickstart.git
-```
-
-2. Open `quickstart` directory and create `.env` file:
-```shell
-cd quickstart
-make env
-```
-
-3. Update the values in `.env` file by adding in your Client ID and Sandbox Access key:
-```
-# please set your <Client ID>
-API_CLIENT_ID=
-
-# please set your <Access key>
-API_SECRET=
-
-# optional: set to true to use Embedded Orders API instead of Users API
+# optional: use Orders API instead of Users API
 IS_ORDER=false
-```
+Install dependencies & start the Node.js server:
 
-**Note about Orders API:** Set `IS_ORDER=true` to use the Orders API instead of the Users API for creating bridge tokens. The Orders API allows you to pre-configure employer and account information, which can be useful for certain integration patterns.
+sh
+Copy
+Edit
+npm install
+npm start
+View the demo:
 
-4. Run all-in-one docker-compose
-```shell
-docker-compose up
-```
+Open http://localhost:5000 in your browser.
 
-or run specific image
-```shell
-make [python_docker|ruby_docker|golang_docker|node_docker|csharp_docker]
-```
+Features
+Truv Bridge Integration: Employment verification using Truv’s APIs.
 
-5. Check the quickstart demo for your programming language:
-* http://localhost:5001 Python
-* http://localhost:5002 Ruby
-* http://localhost:5003 Go
-* http://localhost:5004 Node.Js
-* http://localhost:5005 C#
->>>>>>> 7639fb3e248054c371bff590a6cda4c2c94053cc
+PayPal Paywall: Users must pay via PayPal before seeing verified employment data.
+
+Modern UI: Clean and mobile-friendly, with an easy step-by-step flow.
+
+Ready for Heroku: Just push and it works—no manual static build steps required.
+
+Running on Heroku
+Set your environment variables in Heroku:
+
+sh
+Copy
+Edit
+heroku config:set API_CLIENT_ID=xxx API_SECRET=yyy API_PRODUCT_TYPE=employment IS_ORDER=false
+Deploy:
+
+sh
+Copy
+Edit
+git push heroku master
+Done! Open your Heroku app’s URL to try the live demo.
+
+Resources
+Truv Docs: https://docs.truv.com/docs/quickstart-guide
+
+PayPal Developer: https://developer.paypal.com/
+
