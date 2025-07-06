@@ -212,7 +212,7 @@ app.get('*', (_req, res) => {
 
 // 5. Global error handler
 // (Express expects 4 params: err, req, res, next)
-app.use((err, _req, res, _next) => {
+app.use((err, _req, res) => {
   console.error('Global error handler:', err.message);
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({
